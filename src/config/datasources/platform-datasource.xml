@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources xmlns="http://gdk.com/db" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://gdk.com/db/gdk-db-2.0.xsd">
+
+	<constants>
+		<constant name="max-connection-size" value="10"/>
+		<constant name="min-connection-size" value="2"/>
+		<constant name="init-connection-size" value="2"/>
+		<constant name="available-connection-size" value="10"/>
+		<constant name="acquire-increment-size" value="2"/>
+		<!--  
+		<constant name="max-connection-idletime" value="0"/>
+		-->
+		<constant name="connection-timeout" value="1800"/>
+		<constant name="show-sql" value="false"/>
+		<constant name="load-on-startup" value="true"/>
+		<constant name="connection-provider" value="com.avatar.db.connection.c3p0.C3P0ConnectionProvider"/>
+	</constants>
+	<datasource>
+		<name>flydream</name>
+		<driver-class>com.mysql.jdbc.Driver</driver-class>
+    	<driver-url>jdbc:mysql://127.0.0.1:3306/peakpf</driver-url>
+    	<user>root</user>
+    	<password>123456</password>
+	</datasource> 
+	
+</datasources>
