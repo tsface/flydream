@@ -59,6 +59,8 @@ public class UserBean{
 	@Column(name="DEADLINE")
 	private long deadLine;
 
+	private String depts;
+
 	public int getId() {
 		return id;
 	}
@@ -177,6 +179,14 @@ public class UserBean{
 
 	public void setDeadLine(long deadLine) {
 		this.deadLine = deadLine;
+	}
+
+	public String getDepts() {
+		return depts;
+	}
+
+	public void setDepts(String depts) {
+		this.depts = depts;
 	}
 
 	@Override

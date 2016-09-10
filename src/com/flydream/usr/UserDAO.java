@@ -3,12 +3,14 @@
  */
 package com.flydream.usr;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.avatar.db.DBFactory;
 import com.avatar.db.jdbc.JdbcHandler;
 import com.flydream.common.Constant;
 import com.flydream.common.Page;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * User persistent
@@ -26,7 +28,8 @@ public class UserDAO{
 	
 	
 	private UserDAO(){}
-	
+
+
 	private static class SingleHolder{
 		static UserDAO INSTANCE = new UserDAO();
 	}
@@ -45,10 +48,26 @@ public class UserDAO{
 	 */
 	public boolean insertOne(UserBean user){
 		String sql = "INSERT INTO peak_user(id,username,password,realname,gender,avatar1,avatar2,avatar3,status,lastlogintime,loginip,loginmac,createtime,usertype,deadline) VALUE (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		return jdbcHandler.execute(sql, user.getId(),user.getUserName(),user.getPassWord(),
-				user.getRealName(),user.getGender(),user.getAvatar1(),user.getAvatar2(),user.getAvatar3(),
-				user.getStatus(),user.getLastLoginTime(),user.getLoginIp(),user.getLoginMac(),user.getCreateTime(),
-				user.getUserType(),user.getDeadLine());
+		return jdbcHandler.batchUpdate(getBatchSQL(user)).isSuccess();
+
+	}
+
+	private String[] getBatchSQL(UserBean user){
+		List<String> sqls = new ArrayList<>();
+		StringBuffer sql = new StringBuffer();
+		sql.append("INSERT INTO peak_user(id,username,password,realname,gender,avatar1,avatar2,avatar3,status,lastlogintime,loginip,loginmac,createtime,usertype,deadline) VALUE ");
+		sql.append("(").append(user.getId()).append(" , '").append(user.getUserName()).append("','").append(user.getPassWord()).append("','");
+		sql.append(user.getRealName()).append("',").append(user.getGender()).append(",'").append(user.getAvatar1()).append("','").append(user.getAvatar2()).append("','").append(user.getAvatar3()).append("',");
+		sql.append(user.getStatus()).append(",").append(user.getLastLoginTime()).append(",'").append(user.getLoginIp()).append("',").append(user.getLoginMac()).append(",").append(user.getCreateTime());
+		sql.append(",").append(user.getUserType()).append(",").append(user.getDeadLine()).append(")");
+
+		sqls.add(sql.toString());
+		String[] depts = user.getDepts().split(",");
+
+		for(String dept : depts){
+			sqls.add("INSERT INTO peak_auth_deptuser(id,userid,deptid,isleader) VALUE("+System.currentTimeMillis()/1000+","+user.getId()+","+dept+",0)");
+		}
+		return sqls.toArray(new String[]{});
 	}
 	
 	
@@ -57,9 +76,9 @@ public class UserDAO{
 	 * @param id
 	 * @return
 	 */
-	public boolean deleteOneById(String id){
-		String sql = "DELETE FROM peak_user WHERE id = ?";
-		return jdbcHandler.execute(sql, Integer.valueOf(id));
+	public boolean deleteById(Integer... id){
+		String sql = "DELETE FROM peak_user WHERE id in (?)";
+		return jdbcHandler.execute(sql, id);
 	}
 	
 	/**
@@ -82,7 +101,35 @@ public class UserDAO{
 		String sql = "SELECT * FROM peak_user WHERE 1=1 order by username desc";
 		return jdbcHandler.queryForPageList(UserBean.class, sql, page.getPageNo(),page.getPageSize());
 	}
-	
-	
 
+	/**
+	 * 获取分页总数
+	 * @param user
+	 * @return
+	 */
+	public int getCount(UserBean user){
+		String sql = "SELECT count(*) FROM peak_user WHERE 1=1 "+sqlWhere(user)+"order by username desc";
+		return jdbcHandler.queryForInteger(sql);
+	}
+
+	private String sqlWhere(UserBean user) {
+		if(null!= user && StringUtils.isNotEmpty(user.getUserName())){
+			return " USERNAME='"+user.getUserName()+"' ";
+		}
+		return "";
+	}
+
+	/**
+	 * 根据id进行批量更新
+	 * @param ids
+	 * @return
+	 */
+	public boolean updateStatusByIds(Integer[] ids,boolean isStart) {
+		List<String> sqls = new ArrayList<>();
+		int status = isStart ? 0:1;
+		for (int id : ids){
+			sqls.add("UPDATE peak_user SET status = "+status+" WHERE ID = "+id);
+		}
+		return jdbcHandler.batchUpdate(sqls.toArray(new String[]{})).isSuccess();
+	}
 }

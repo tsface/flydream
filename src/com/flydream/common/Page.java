@@ -6,10 +6,10 @@ package com.flydream.common;
 import com.avatar.gdk.util.PagerUtils;
 
 /**
- * 描述当前类的作用
+ * 分页对象
  * 
  * @author liyan
- * @version 2014-1-9
+ * @version 2015-1-9
  * @since 1.0
  * @see
  */
@@ -24,10 +24,12 @@ public class Page extends PagerUtils
 
 	public Page()
 	{
+		super();
 	}
 
 	public Page(int pageno, int pagesize)
 	{
+		super();
 		setPageNo(pageno);
 		setPageSize(pagesize);
 	}
